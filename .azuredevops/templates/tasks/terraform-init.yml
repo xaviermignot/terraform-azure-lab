@@ -1,0 +1,22 @@
+parameters:
+  - name: currentUser
+    type: string
+    displayName: 'Current User'
+
+steps:
+  - task: TerraformInstaller@1
+    displayName: Install Terraform
+    inputs:
+      terraformVersion: latest
+  - task: AzureCLI@2
+    displayName: 'Terraform Init'
+    inputs:
+      azureSubscription: sc-azureRm
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        terraform init -backend-config=storage_account_name=$STORAGE_ACCOUNT_NAME -backend-config=resource_group_name=$STORAGE_RG_NAME
+      workingDirectory: infra
+    env:
+      STORAGE_ACCOUNT_NAME: staztflab${{ parameters.currentUser }}state
+      STORAGE_RG_NAME: rg-aztflab-${{ parameters.currentUser }}-state
