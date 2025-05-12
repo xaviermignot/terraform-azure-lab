@@ -9,26 +9,21 @@ data "azurerm_resource_group" "rg" {
 
 resource "random_pet" "pet" {}
 
-resource "azurerm_storage_account" "account" {
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = var.location
+module "storage_account" {
+  source              = "./storage_account"
   name                = local.storage_account_name
-
-  account_replication_type      = "LRS"
-  account_tier                  = "Standard"
-  public_network_access_enabled = true
-  https_traffic_only_enabled    = true
-  min_tls_version               = "TLS1_2"
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
 }
 
 resource "azurerm_storage_account_static_website" "static_website" {
-  storage_account_id = azurerm_storage_account.account.id
+  storage_account_id = module.storage_account.id
   index_document     = "index.html"
 }
 
 resource "azurerm_storage_blob" "index" {
   name                   = "index.html"
-  storage_account_name   = azurerm_storage_account.account.name
+  storage_account_name   = module.storage_account.name
   storage_container_name = "$web"
 
   type           = "Block"
@@ -36,4 +31,9 @@ resource "azurerm_storage_blob" "index" {
   source_content = file("../src/index.html")
 
   depends_on = [azurerm_storage_account_static_website.static_website]
+}
+
+moved {
+  from = azurerm_storage_account.account
+  to   = module.storage_account.azurerm_storage_account.account
 }
