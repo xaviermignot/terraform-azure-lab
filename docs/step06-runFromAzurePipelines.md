@@ -69,3 +69,36 @@ steps:
       currentUser: ${{ parameters.currentUser }}
 ```
 </details>
+
+### Application des changements
+L'étape suivante consiste à ajouter une tâche de type `AzureCLI` pour appliquer les changements. Le yaml de cette tâche va ressembler au contenu du fichier `.azuredevops/templates/tasks/terraform-init.yml`, à l'exception de la commande dans la partie `inlineScript` qui sera `terraform apply -auto-approve` au lieu de `terraform init`.  
+Aussi les variables d'environnement dans la partie `env` ne sont pas les mêmes: les informations du compte de stockage ne sont plus nécessaires car Terraform est déjà initialisé. Par contre il faut ajouter une variable `TF_VAR_current_user` avec l'utilisateur courant et une variable `ARM_SUBSCRIPTION_ID` avec l'identifiant de la souscription Azure.  
+
+<details>
+<summary>Dans le fichier <code>.azuredevops/deploy.yml</code>, remplacer l'élément <code>/<code> avec le contenu suivant:</summary>
+
+```yaml
+steps:
+  - template: /.azuredevops/templates/tasks/terraform-init.yml
+    parameters:
+      currentUser: ${{ parameters.currentUser }}
+  - task: AzureCLI@2
+    displayName: 'Terraform Apply'
+    inputs:
+      azureSubscription: sc-azureRm
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        terraform apply -auto-approve
+      workingDirectory: infra
+    env:
+      TF_VAR_current_user: ${{ parameters.currentUser }}
+      ARM_SUBSCRIPTION_ID: $(subscriptionId)
+```
+</details>
+
+## Création du pipeline dans Azure DevOps et premier lancement
+Une fois les modifications terminées, vous pouvez:
+- Créer une branche sur ce repository
+- Faire un commit avec tous vos changements
+- Depuis l'interface d'Azure DevOps, vous pouvez ajouter votre pipeline en allant chercher le fichier sur votre branche et le lancer pour la première fois
