@@ -21,7 +21,7 @@ resource "azurerm_storage_blob" "error" {
   content_type   = "text/html"
   source_content = file("../src/error.html")
 
-  depends_on = [azurerm_storage_account_static_website.static_website]
+  depends_on = [module.storage_account]
 }
 ```
 </details>
@@ -54,7 +54,7 @@ resource "azurerm_storage_blob" "index" {
   content_type   = "text/html"
   source_content = file("../src/index.html")
 
-  depends_on = [azurerm_storage_account_static_website.static_website]
+  depends_on = [module.storage_account]
 }
 
 resource "azurerm_storage_blob" "error" {
@@ -66,7 +66,7 @@ resource "azurerm_storage_blob" "error" {
   content_type   = "text/html"
   source_content = file("../src/error.html")
 
-  depends_on = [azurerm_storage_account_static_website.static_website]
+  depends_on = [module.storage_account]
 }
 ```
 Ces 2 blocs de code se ressemblent, avec un langage de programmation classique on chercherait à factoriser cette partie, on peut aussi le faire avec Terraform.  
@@ -92,7 +92,7 @@ resource "azurerm_storage_blob" "files" {
   content_type   = "text/html"
   source_content = file("../src/${each.key}")
 
-  depends_on = [azurerm_storage_account_static_website.static_website]
+  depends_on = [module.storage_account]
 }
 ```
 </details>
@@ -119,7 +119,7 @@ resource "azurerm_storage_blob" "files" {
   content_type   = "text/html"
   source_content = file("../src/${each.key}")
 
-  depends_on = [azurerm_storage_account_static_website.static_website]
+  depends_on = [module.storage_account]
 }
 ```
 </details>
@@ -142,7 +142,7 @@ resource "azurerm_storage_blob" "files" {
   content_type = "text/${split(".", each.key)[1]}"
   source_content = file("../src/${each.key}")
 
-  depends_on = [azurerm_storage_account_static_website.static_website]
+  depends_on = [module.storage_account]
 }
 ```
 </details>

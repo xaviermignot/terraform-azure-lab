@@ -32,7 +32,6 @@ variable "name" {
 variable "resource_group_name" {
   type        = string
   description = "The name of the resource group to create the storage account in"
-
 }
 
 variable "location" {
@@ -40,7 +39,7 @@ variable "location" {
   description = "The location to use for all resources."
 }
 ```
-5. Dans le fichier `storage_account/main.tf` on déplace la déclaration du compte de stockage en utilisant les variables:
+5. Dans le fichier `storage_account/main.tf` on déplace la déclaration du compte de stockage et du site web statique en utilisant les variables:
 ```hcl
 resource "azurerm_storage_account" "account" {
   resource_group_name = var.resource_group_name
@@ -53,13 +52,14 @@ resource "azurerm_storage_account" "account" {
   https_traffic_only_enabled    = true
   min_tls_version               = "TLS1_2"
 }
-```
-6. Dans le module root, l'URL du site web est retournée en tant qu'_output_. Comme le compte de stockage n'est plus dans le module root, il faut exposer cette URL en tant qu'output du module `storage_account`, dans le fichier `storage_account/outputs.tf`. Le module root a aussi besoin du nom et de l'id du compte de stockage, donc on les ajoute également en tant qu'outputs:
-```hcl
-output "id" {
-  value = azurerm_storage_account.account.id
-}
 
+resource "azurerm_storage_account_static_website" "static_website" {
+  storage_account_id = azurerm_storage_account.account.id
+  index_document     = "index.html"
+}
+```
+6. Dans le module root, l'URL du site web est retournée en tant qu'_output_. Comme le compte de stockage n'est plus dans le module root, il faut exposer cette URL en tant qu'output du module `storage_account`, dans le fichier `storage_account/outputs.tf`. Le module root a aussi besoin du nom du compte de stockage, donc on l'ajoute également en tant qu'output:
+```hcl
 output "name" {
   value = azurerm_storage_account.account.name
 }
@@ -77,20 +77,19 @@ module "storage_account" {
   location            = data.azurerm_resource_group.rg.location
 }
 ```
-8. Il faut ensuite mettre à jour les ressources `azurerm_storage_account_static_website.static_website` et `azurerm_storage_blob.index` pour leur faire utiliser les _outputs_ du module à la place des _attributs_ de la ressource de type `azurerm_storage_account` qui a été déplacée dans le module:
+8. Il faut ensuite mettre à jour la ressource `azurerm_storage_blob.index` pour lui faire utiliser l'_output_ du module à la place des _attributs_ de la ressource de type `azurerm_storage_account` qui a été déplacée dans le module. Il faut également modifier le meta-argument `depends_on` sur cette ressource pour indiquer qu'elle dépend du module:
 ```hcl
-resource "azurerm_storage_account_static_website" "static_website" {
-  storage_account_id = module.storage_account.id
-  index_document     = "index.html"
-}
-
 resource "azurerm_storage_blob" "index" {
   name                   = "index.html"
   storage_account_name   = module.storage_account.name
   # ...
+  depends_on = [module.storage_account]
 }
 ```
-9. Dernier point, le module root renvoie l'URL du site web en tant qu'output, il faut modifier cet output qui fait le "passe-plat" de l'output du module `storage_account`:
+> [!NOTE]
+> L'utilisation de `depends_on` est nécessaire ici pour faire comprendre à Terraform que le blob doit être créé après la création de la ressource `azurerm_storage_account_static_website`. Avant cette étape le `depends_on` était utilisé en référençant directement la ressource, désormais on utilise le module pour indiquer à Terraform de terminer la création de _toutes_ les ressources du module avant de passer au blob.  
+> Vous trouverez plus d'information le _meta-argument_ `depends_on` sur [cette page](https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on) de la documentation.
+9. Dernier point, le module `storage_account` renvoie l'URL du site web en tant qu'_output_. Le module root peut également renvoyer des _output_, notamment pour les afficher dans la console. Pour cela on ajoute l'output suivant dans le fichier `infra/outputs.tf` qui était vide jusqu'à présent:
 ```hcl
 output "website_url" {
   value       = module.storage_account.static_website_url
@@ -104,14 +103,15 @@ Depuis le terminal du codespace, dans le dossier `infra`, lancez un `terraform p
 Vous obtenez une erreur `Error: Module not installed`, car le module n'est pas installé: après chaque ajout de module, il faut relancer un `terraform init`.  
 Une fois que c'est fait, relancez le `terraform plan`. Le plan devrait se dérouler correctement avec le résultat suivant:
 ```
-Plan: 2 to add, 0 to change, 2 to destroy.
+Plan: 3 to add, 0 to change, 3 to destroy.
 ```
-Terraform prévoit donc d'ajouter 2 ressources et d'en détruire 2, alors qu'on a juste "refactorisé" notre code sans changer aux ressources 🧐  
+Terraform prévoit donc d'ajouter 3 ressources et d'en détruire 3, alors qu'on a juste "refactorisé" notre code sans changer aux ressources 🧐  
 C'est un effet du state de Terraform: déplacer le compte de stockage dans un module change son nom logique dans la configuration, alors que l'ancien nom est toujours dans le state. Pour Terraform il faut donc supprimer le compte de stockage du module _root_ et créer celui du module `storage_account`.  
 Et comme l'objet index.html ne peut pas être déplacé d'un compte de stockage à un autre, Terraform pense qu'il faut aussi le supprimer et le recréer.  
 
 Il faut garder cette mécanique à l'esprit quand on travaille avec Terraform: une des conséquence du state est que le renommage de ressources et le refactoring du code en général peuvent avoir des conséquences. Imaginez avoir fait la même chose sur une base de données de production 🤯  
 
+> [!NOTE]
 > Récemment Terraform a ajouté des solutions pour permettre de faciliter le [refactoring](https://developer.hashicorp.com/terraform/language/modules/develop/refactoring) du code, notamment avec les blocs `moved`
 
 On va donc utiliser un block `moved` dans le fichier `main.tf` du module _root_ comme ceci:
@@ -119,6 +119,11 @@ On va donc utiliser un block `moved` dans le fichier `main.tf` du module _root_ 
 moved {
   from = azurerm_storage_account.account
   to   = module.storage_account.azurerm_storage_account.account
+}
+
+moved {
+  from = azurerm_storage_account_static_website.static_website
+  to   = module.storage_account.azurerm_storage_account_static_website.static_website
 }
 ```
 Avant de relancer un _plan_: cette fois aucun changement n'est détecté, on lance également un _apply_ pour que mettre à jour le state, sans conséquence sur notre infrastructure.

@@ -74,4 +74,4 @@ Cela va créer un nouveau compte de stockage dont le nom commence par `staztflab
 > Pour la suite du lab, vous pouvez choisir de rester sur le workspace de staging, ou de détruire les ressources de staging (`terraform destroy`) avant de revenir sur le workspace par défaut (`terraform workspace select default`).
 
 ## Etape suivante
-On peut maintenant passer à l'étape suivante du lab ou l'on va explorer des fonctionnalités plus avancées du langage HCL, c'est par [ici](docs/step05-addErrorPageAndCss.md).
+On peut maintenant passer à l'étape suivante du lab ou l'on va explorer des fonctionnalités plus avancées du langage HCL, c'est par [ici](/docs/step05-addErrorPageAndCss.md).
