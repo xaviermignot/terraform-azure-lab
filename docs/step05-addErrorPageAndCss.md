@@ -156,6 +156,8 @@ Félicitations vous avez atteint l'ultime étape de ce lab 🚀🥳
 Mais ce lab n'est qu'un point de départ et il y a encore plein de choses à apprendre dans le monde de Terraform. N'hésitez pas à continuer d'explorer par vous-même, il existe également d'autres [tutoriels](https://developer.hashicorp.com/terraform/tutorials) sur le site officiel.  
 N'hésitez pas à vous référer au paragraphe [suivant](/README.md#a-propos-de-la-documentation-de-terraform) au début de ce lab pour voir les liens vers les sections principales de la documentation officielle.  
 
+Il existe une étape bonus de ce lab qui consiste à faire tourner Terraform depuis un pipeline Azure DevOps. Si vous souhaitez suivre cette étape, c'est par [ici](/docs/step06-runFromAzurePipelines.md).
+
 Dernier point avant de partir, quand vous aurez terminé n'oubliez pas de supprimer vos ressources dans Azure avec la commande suivante:
 ```shell
 terraform destroy -auto-approve

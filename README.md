@@ -16,11 +16,15 @@ Pour faire tourner ce lab vous n'avez rien à installer, vous allez utiliser le 
 
 ## Fonctionnement, objectif et lancement du lab
 L'objectif de ce lab est de créer une application web simple hébergée dans un _storage account_, le service de stockage managé par Azure.  
-Tout se passe dans ce repository git, en plusieurs étapes.  
-Pour commencer, lancez un codespace en utilisant ce bouton:  
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/xaviermignot/terraform-azure-lab?quickstart=1)
 
-Une fois le codespace prêt, placez-vous dans le terminal et lancez la commande `az login` pour vous connecter à Azure, puis lancez les commandes suivantes:
+> [!NOTE]
+> Théoriquement ce lab peut être fait en autonomie, mais il a été conçu pour être supervisé par un formateur, dans un groupe de plusieurs personnes. Le formateur (ou la formatrice) est supposé vous fournir un compte pour vous connecter à un environnement Azure, ainsi qu'un groupe de ressources dans une souscription pour le déroulement du lab.
+
+Tout le contenu du lab est dans ce repository GitHub, suivez ces étapes pour commencer:
+1. Créez un fork du repository sur votre compte en cliquant [ici](https://github.com/xaviermignot/terraform-azure-lab/fork)
+2. Depuis votre fork, créez un _codespace_ en utilisant le bouton _Code_ en haut de la page principal comme expliqué [ici](https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository#creating-a-codespace-for-a-repository)
+3. Une fois le codespace prêt, placez-vous dans le terminal et lancez la commande `az login` pour vous connecter à Azure
+4. Lancez ensuite les commandes suivantes:
 ```shell
 zsh
 omz plugin enable terraform
@@ -30,19 +34,16 @@ export TF_VAR_current_user=$(az ad signed-in-user show --query displayName -o ts
 Ces commandes lancent le shell _zsh_ à place de _bash_, et activent le plugin de Terraform de _Oh My Zsh_, avec de l'auto-complétion et des alias bien pratiques 🤓  
 Elles définissent également des variables d'environnements utiles pour le lab, assurez-vous qu'elles soient toujours définies.
 
-Pour plus d'information sur l'interface de GitHub Codespaces, la documentation utilisateur est disponible [ici](https://docs.github.com/en/codespaces/developing-in-a-codespace/developing-in-a-codespace). La plupart des raccourci claviers habituels fonctionnent dans le terminal (`tab` pour l'autocomplétion, `Ctrl+r` pour rechercher dans l'historique, `Ctrl+l` pour effacer, etc.). Le raccourci `Alt+s` est également bien pratique pour passer du terminal à l'éditeur de code, et inversement 😉
+> [!TIP]
+> Par défaut, votre codespace va se mettre automatiquement en veille au bout de 30 minutes. Si vous devez le redémarrer après cela, ou si vous faites le lab en plusieurs fois, la connexion avec Azure sera toujours active au redémarrage du codespace. Par contre vous devrez relancer les commandes de l'étape 4 ci-dessus pour vous replacer dans `zsh` avec les plugins chargés et surtout pour redéfinir les variables d'environnement.
 
-## Organisation des branches et solution 😉
-La branche `main` du repo contient la documentation et le début de la configuration Terraform du lab. La branche `solution` est basée sur la `main` et contient toute la solution du lab, chaque étape correspondant à un tag git.  
-Pour évoluer par vous même dans ce lab tout en ayant la solution à portée de main si nécessaire, vous pouvez lancer la commande suivante:
-```shell
-git worktree add _solution step01-simpleExample
-```
-Cette commande utilise la fonctionnalité de _worktree_ de git pour monter une copie du repo dans le dossier `_solution` sur le tag `step01-simpleExample` qui correspond à la solution de la première étape.  
-Cette copie du repo est accessible depuis l'explorateur de fichiers du codespace, tout en étant ignorée par git. Depuis le terminal du codespace, vous pouvez vous placer dans le dossier `_solution` et lister les _tags_ avec la commande `git tag`, puis naviguer dans les étapes avec la commande `git checkout` (par exemple `git checkout step02-addModule` pour voir la solution de l'étape 2).  
+Pour plus d'information sur l'interface de GitHub Codespaces, la documentation utilisateur est disponible [ici](https://docs.github.com/en/codespaces/developing-in-a-codespace/developing-in-a-codespace). La plupart des raccourci claviers habituels fonctionnent dans le terminal (`tab` pour l'autocomplétion, `Ctrl+r` pour rechercher dans l'historique, `Ctrl+l` pour effacer, etc.). Le raccourci `Ctrl+j` est également bien pratique pour masquer le terminal et donc de basculer entre le terminal et l'éditeur de code, et inversement 😉
 
-> [!NOTE]
-> Cette copie avec la solution est là pour vous aider en cas de problème, l'objectif est que vous puissiez terminer le lab sans l'utiliser 😉
+## Organisation du repo et solution 😉
+Le répertoire `infra` du repo (et donc de votre fork) contient le début de la configuration Terraform du lab, c'est un point de départ que vous allez modifier depuis votre codespace.  
+Si besoin la solution de chaque étape du lab est disponible dans des sous-dossiers du répertoire `_solution`. Vous pouvez les utilisez si jamais vous êtes bloqué ou que vous voulez aller plus vite.  
+
+Les étapes principales du lab se passent en local, donc vous pouvez rester dans le filesystem de votre codespace sans faire de commit. Il y a une étape "bonus" qui consiste à faire tourner Terraform depuis un pipeline Azure DevOps. Pour cela il va falloir pousser vos changements, et établir une connexion entre votre fork et une organisation Azure DevOps. C'est pour cela qu'il vaut mieux créer un fork du repo, sinon il ne serait pas possible de pousser vos changement sur un repository distant.
 
 ## A propos de la documentation de Terraform
 Les concepts principaux de Terraform seront abordés tout au long de ce lab, avec des liens vers la documentation officielle.  
