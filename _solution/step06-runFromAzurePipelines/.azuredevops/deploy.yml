@@ -1,0 +1,31 @@
+name: Deploy Azure resources
+
+parameters:
+  - name: currentUser
+    type: string
+    displayName: 'Current User'
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: global-variables
+
+steps:
+  - template: /.azuredevops/templates/tasks/terraform-init.yml
+    parameters:
+      currentUser: ${{ parameters.currentUser }}
+  - task: AzureCLI@2
+    displayName: 'Terraform Apply'
+    inputs:
+      azureSubscription: sc-azureRm
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        terraform apply -auto-approve
+      workingDirectory: infra
+    env:
+      TF_VAR_current_user: ${{ parameters.currentUser }}
+      ARM_SUBSCRIPTION_ID: $(subscriptionId)

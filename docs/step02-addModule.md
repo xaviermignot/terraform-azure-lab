@@ -3,8 +3,7 @@
 Dans cette étape nous allons introduire la notion de _module_ qui permet de mieux organiser notre code Terraform.  
 
 > [!TIP]
-> Si vous avez rencontré des soucis sur la première étape, vous pouvez consulter le code lié au tag `step01-simpleExample` [ici](https://github.com/xaviermignot/terraform-azure-lab/tree/step01-simpleExample/infra) sur la branche `solution` pour voir la solution et l'intégrer dans votre copie du repo.
-> Vous pouvez aussi vous référer au dossier `_solution` qui contient un _worktree_ git avec le code lié à ce tag.
+> Si vous avez rencontré des soucis sur la première étape, vous pouvez consulter le code de la solution dans le répertoire `_solution/step01-simpleExample`. et l'intégrer dans votre copie du repo.
 
 ## Les modules de Terraform
 Comme dans de nombreux langages les modules de Terraform permettent d'organiser le code pour combiner des ressources, et créer des briques facilement réutilisables.  

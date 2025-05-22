@@ -21,7 +21,7 @@ L'objectif de ce lab est de créer une application web simple hébergée dans un
 > Théoriquement ce lab peut être fait en autonomie, mais il a été conçu pour être supervisé par un formateur, dans un groupe de plusieurs personnes. Le formateur (ou la formatrice) est supposé vous fournir un compte pour vous connecter à un environnement Azure, ainsi qu'un groupe de ressources dans une souscription pour le déroulement du lab.
 
 Tout le contenu du lab est dans ce repository GitHub, suivez ces étapes pour commencer:
-1. Créez un fork du repository sur votre compte en cliquant [ici](https://github.com/xaviermignot/terraform-azure-lab/fork)
+1. Créez un fork du repository sur votre compte en utilisant le bouton _fork_ en haut de cette page
 2. Depuis votre fork, créez un _codespace_ en utilisant le bouton _Code_ en haut de la page principal comme expliqué [ici](https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository#creating-a-codespace-for-a-repository)
 3. Une fois le codespace prêt, placez-vous dans le terminal et lancez la commande `az login` pour vous connecter à Azure
 4. Lancez ensuite les commandes suivantes:

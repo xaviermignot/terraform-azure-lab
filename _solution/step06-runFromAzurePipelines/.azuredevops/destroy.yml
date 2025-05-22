@@ -1,0 +1,45 @@
+name: Destroy Azure resources
+
+parameters:
+  - name: currentUser
+    type: string
+    displayName: 'Current User'
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: global-variables
+  - group: variables-${{ parameters.currentUser }}
+
+steps:
+  - task: TerraformInstaller@1
+    displayName: Install Terraform
+    inputs:
+      terraformVersion: latest
+  - task: AzureCLI@2
+    displayName: 'Terraform Init'
+    inputs:
+      azureSubscription: sc-azureRm
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        terraform init -backend-config=storage_account_name=$STORAGE_ACCOUNT_NAME -backend-config=resource_group_name=$STORAGE_RG_NAME
+      workingDirectory: infra
+    env:
+      STORAGE_ACCOUNT_NAME: $(storageAccountName)
+      STORAGE_RG_NAME: $(storageRgName)
+  - task: AzureCLI@2
+    displayName: 'Terraform Destroy'
+    inputs:
+      azureSubscription: sc-azureRm
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |        
+        terraform destroy -auto-approve
+      workingDirectory: infra
+    env:
+      TF_VAR_current_user: ${{ parameters.currentUser }}
+      ARM_SUBSCRIPTION_ID: $(subscriptionId)
